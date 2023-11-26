@@ -19,9 +19,10 @@ for i in range(1,3):
     drama_container = soup.find("div", class_="col-lg-8 col-md-8")
     all_drama_divs = drama_container.find_all("div", class_ = "box")
     for drama in all_drama_divs:
+        drama_id = drama['id'].split("-")[1]                                # Drama's ID in their records
         text_primary_title = drama.find("h6", class_="text-primary title")
-        drama_title = text_primary_title.find("a").text
-        drama_link = text_primary_title.find("a").get('href')
-        print(f"NAME: {drama_title}  |  LINK: {URL + drama_link}")
+        drama_title = text_primary_title.find("a").text                     # Drama's title
+        drama_link = text_primary_title.find("a").get('href')               # Drama's link
+        print(f"NAME: {drama_title} | ID: {drama_id} | LINK: {URL + drama_link}")
         output_file.write(URL + drama_link + "\n")
     sleep(random.randint(2,10))

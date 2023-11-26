@@ -9,15 +9,16 @@ soup = BeautifulSoup(top_KDs_1st_page.content, "html.parser")
 
 j = 0
 curr_page_drama_links = []
-while j < 3:
+while j < 1:
     # --Getting all links for K-Dramas from Top Dramas page 1--
     drama_container = soup.find("div", class_="col-lg-8 col-md-8")
     all_drama_divs = drama_container.find_all("div", class_ = "box")
     for drama in all_drama_divs:
-        drama_title_h6 = drama.find("h6", class_="text-primary title")
-        drama_link = drama_title_h6.find("a").get('href')
-        print(f"Link: {URL + drama_link}")
-        curr_page_drama_links.append(URL + drama_link)
+        print(drama['id'])
+        # drama_title_h6 = drama.find("h6", class_="text-primary title")
+        # drama_link = drama_title_h6.find("a").get('href')
+        # print(f"Link: {URL + drama_link}")
+        # curr_page_drama_links.append(URL + drama_link)
     j += 1
     
 print(f"Links to each drama on current page: {curr_page_drama_links}")
