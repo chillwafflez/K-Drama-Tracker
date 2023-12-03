@@ -19,6 +19,7 @@ box_body = left_side.find("div", class_="box-body")
 # Get cover
 image_class = box_body.find("img", class_="img-responsive")
 cover_link = image_class["src"]
+print(f"COVER LINK: {cover_link}")
 
 show_detailsxx = box_body.find("div", id="show-detailsxx")
 
@@ -93,8 +94,3 @@ print(f"ORIGINAL NETWORKS: {networks}")
 # Content Rating
 content_rating = list_m_b_0.find("li", class_="list-item p-a-0 content-rating").text
 print(f"CONTENT RATING: {content_rating}")
-
-
-
-
-

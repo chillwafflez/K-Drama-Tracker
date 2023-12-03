@@ -25,4 +25,4 @@ for i in range(1,3):
         drama_link = text_primary_title.find("a").get('href')               # Drama's link
         print(f"NAME: {drama_title} | ID: {drama_id} | LINK: {URL + drama_link}")
         output_file.write(URL + drama_link + "\n")
-    sleep(random.randint(2,10))
+    sleep(random.randint(2,15))
