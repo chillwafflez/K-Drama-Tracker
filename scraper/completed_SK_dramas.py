@@ -4,11 +4,13 @@ from time import sleep
 import random
 
 URL = "https://mydramalist.com"
-top_kdramas_link = URL + "/search?adv=titles&ty=68&co=3&so=top"
-output_file_name = "drama_links.txt"
+# top_kdramas_link = URL + "/search?adv=titles&ty=68&co=3&so=top"
+top_kdramas_link = URL + "/search?adv=titles&ty=68&co=3&st=3&so=top"
+output_file_name = "scraped_data/completed_SK_links.txt"
 output_file = open(output_file_name, "w", encoding="utf-8") 
 
-for i in range(1,3):
+# Loop through each page, saving links to each completed South Korean drama to text file
+for i in range(1,3):    # currently 178 pages
     # Get page
     print(f"-----PAGE {i}-----")
     page_link = top_kdramas_link + "&page=" + str(i)

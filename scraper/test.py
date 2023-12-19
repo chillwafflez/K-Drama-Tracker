@@ -1,11 +1,18 @@
 import requests
 from bs4 import BeautifulSoup
 
-URL = "https://mydramalist.com"
-first_page_sk_dramas_URL = URL + "/search?adv=titles&ty=68&co=3&so=top"
+URL = "https://mydramalist.com/25560-moving"
 
 IP_URL = "htt"
 
-top_KDs_1st_page = requests.get(first_page_sk_dramas_URL)
-soup = BeautifulSoup(top_KDs_1st_page.content, "html.parser")
+moving_page = requests.get(URL)
+soup = BeautifulSoup(moving_page.content, "html.parser")
+
+cover_div = soup.find("div", class_="col-sm-4 film-cover cover")
+cover_url = cover_div.find("img", class_="img-responsive")['src']
+print(cover_url)
+
+with open("scraped_data/penis.jpg", 'wb') as f:
+    response = requests.get(cover_url)
+    f.write(response.content)
 

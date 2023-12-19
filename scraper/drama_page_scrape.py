@@ -4,36 +4,39 @@ from time import sleep
 import random
 
 URL = "https://mydramalist.com"
-drama_links = open("drama_links.txt", "r") 
+drama_links = open("scraped_data/completed_SK_links.txt", "r") 
 
 test_link = drama_links.readline().strip()
 
 page = requests.get(test_link)
 soup = BeautifulSoup(page.content, "html.parser")
 
-# ----- Get Information from left side of page ------ #
+
+# Get name
+
+# Get MDL ID
+mdl_id = test_link.split()
+
+# ---------- Get Information from Left Side of Page ----------- #
 left_side = soup.find("div", class_="col-lg-8 col-md-8 col-rightx")
-# Box body has information relating to K-Drama
-box_body = left_side.find("div", class_="box-body")
 
 # Get cover
-image_class = box_body.find("img", class_="img-responsive")
-cover_link = image_class["src"]
+cover_link = left_side.find("img", class_="img-responsive")['src']
+# with open("scraped_data/completed_SK_covers/", 'wb') as f:
+#     response = requests.get(cover_link)
+#     f.write(response.content)
 print(f"COVER LINK: {cover_link}")
 
-show_detailsxx = box_body.find("div", id="show-detailsxx")
-
 # Get Rating (div under show_detailsxx)
-rating = show_detailsxx.find("div", class_="box deep-orange").text
+rating = left_side.find("div", class_="box deep-orange").text
 print(f"RATING: {rating}")
 
 # Get synopsis (div under show_detailsxx)
-show_synopsis = show_detailsxx.find("div", class_="show-synopsis")
-synopsis = show_synopsis.find("span").text
-print(synopsis)
+show_synopsis = left_side.find("div", class_="show-synopsis").find("span").text
+print(show_synopsis)
 
-# Get extra info (div under show_detailsxx and right below show-synopsis)
-extra_info = show_detailsxx.find("ul", class_="list m-a-0")
+# --- Get extra info (div under show_detailsxx and right below show-synopsis) --- #
+extra_info = left_side.find("ul", class_="list m-a-0")
 
 # -- Get Native title, other names, screenwriter, and director
 list_items_p_a_0 = extra_info.find_all("li", class_="list-item p-a-0")
@@ -71,20 +74,32 @@ tag_list = tag_list.find_all("span")
 tags = [tag.text for tag in tag_list]
 print(f"TAGS: {tags}")
 
-# ----- Get Information from right side of page ------ #
+# Get cast URL  
+cast_url = left_side.find("div", class_="box-footer text-center").find("a").get('href')
+print(f"CAST URL: {cast_url}")
+
+# ---------- Get Information from Right Side of Page ----------- #
 right_side = soup.find("div", class_="col-lg-4 col-md-4")
 
 # -- Get episode count, air date, original network, and content rating
 list_m_b_0 = right_side.find("ul", class_="list m-b-0")
 list_of_details = list_m_b_0.find_all("li", class_="list-item p-a-0")
 
+# Name
+name = list_of_details[0].find("span").text
+print(f'NAME: {name}')
+
+# Country
+country = list_of_details[1].find(string=True, recursive=False)
+print(f'COUNTRY: {country}')
+
 # Episode Count
 episode_count = list_of_details[2].text
-print(f'EP. COUNT {episode_count}')
+print(f'EP. COUNT: {episode_count}')
 
 # Air Dates
 air_dates = list_of_details[3].text
-print(f'AIR DATE {air_dates}')
+print(f'AIR DATE: {air_dates}')
 
 # Original Network
 networks = list_of_details[5].find_all("a")
