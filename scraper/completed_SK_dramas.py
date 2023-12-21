@@ -27,4 +27,6 @@ for i in range(1,3):    # currently 178 pages
         drama_link = text_primary_title.find("a").get('href')               # Drama's link
         print(f"NAME: {drama_title} | ID: {drama_id} | LINK: {URL + drama_link}")
         output_file.write(URL + drama_link + "\n")
-    sleep(random.randint(2,15))
+    sleep(random.randint(5,15))
+
+    output_file.close()
