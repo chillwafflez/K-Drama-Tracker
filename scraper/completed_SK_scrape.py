@@ -33,20 +33,20 @@ def scrape_page_completedSK(link):
 
     # Get synopsis (div under show_detailsxx)
     show_synopsis = left_side.find("div", class_="show-synopsis").find("span").text if left_side.find("div", class_="show-synopsis").find("span") else "N/A"
-    print(show_synopsis)
+    print(f"SYNOPSIS: {show_synopsis}")
 
     # --- Get extra info (div under show_detailsxx and right below show-synopsis) --- #
     extra_info = left_side.find("ul", class_="list m-a-0")
 
     # -- Get Native title, other names, or other list-item p-a-0s -- #
-    list_items_p_a_0 = extra_info.find_all("li", class_="list-item p-a-0")
+    list_items_p_a_0_LEFT_SIDE = extra_info.find_all("li", class_="list-item p-a-0")
 
     native_title = ""
     other_names_list = []
     other_names_str = ""
 
-    # loop through all list items of class list-item p-a-0
-    for list_item in list_items_p_a_0:
+    # loop through all list items of class list-item p-a-0 to get: native title, other names
+    for list_item in list_items_p_a_0_LEFT_SIDE:
         if list_item.find("b"):
             # check their b tag to get correct data
             if list_item.find("b").text == "Native Title:":
@@ -58,27 +58,17 @@ def scrape_page_completedSK(link):
                         # if there is no alternate name, then 'a_hrefs_under_other_names_list_time' is an a tag with no text inside
                         if len(name) != 0:
                             other_names_list.append(name["title"])
-                            other_names_str += name["title"] + "|"
+                            other_names_str += name["title"] + "_"
     print(f"NATIVE TITLE: {native_title}")
     print(f"OTHER NAMES: {other_names_list}")
     print(f"OTHER NAMES STRING: {other_names_str}")
-
-    # Screenwriter
-    # screen_writer = list_items_p_a_0[2].find("a").text
-    # screen_writer_link = URL + list_items_p_a_0[2].find("a")['href']
-    # print(f"SCREENWRITER: {screen_writer} | Link: {screen_writer_link}")
-
-    # Director
-    # director = list_items_p_a_0[3].find("a").text
-    # director_link = URL + list_items_p_a_0[3].find("a")["href"]
-    # print(f"DIRECTOR {director} | Link: {director_link}")
 
     # Genre
     genres = []
     genre_list = extra_info.find("li", class_="list-item p-a-0 show-genres")
     if genre_list:
         genre_list = genre_list.find_all("a")
-        genres = [genre.text for genre in genre_list]
+        genres = [genre.text for genre in genre_list if genre]
     print(f"GENRES: {genres}")
 
     # Tags
@@ -86,68 +76,101 @@ def scrape_page_completedSK(link):
     tag_list = extra_info.find("li", class_="list-item p-a-0 show-tags")
     if tag_list:
         tag_list = tag_list.find_all("span")
-        tags = [tag.text for tag in tag_list]
+        tags = [tag.text.rstrip(",") for tag in tag_list if tag]
     print(f"TAGS: {tags}")
 
     # Get cast URL and save link to text file
     cast_url = link + "/cast"
     print(f"CAST URL: {cast_url}")
-    cast_url_path = "scraped_data/completed_SK_cast.txt"
-    cast_url_name = title + "|" + str(mdl_id) + "|" + cast_url + "\n"
-    with open(cast_url_path, 'w', encoding="utf-8") as f:
-        f.write(cast_url_name)
 
     # ---------- Get Information from Right Side of Page ----------- #
     right_side = soup.find("div", class_="col-lg-4 col-md-4")
 
     # -- Get episode count, air date, original network, and content rating
     list_m_b_0 = right_side.find("ul", class_="list m-b-0")
-    list_of_details = list_m_b_0.find_all("li", class_="list-item p-a-0")
+    list_items_p_a_0_RIGHT_SIDE = list_m_b_0.find_all("li", class_="list-item p-a-0")
 
-    # Name (from details window on right side)
-    name = list_of_details[0].find("span").text
-    print(f'NAME: {name}')
+    name = ""
+    country = ""
+    episode_count = 0
+    air_dates = ""
+    networks = []
+    duration = ""
+    content_rating = ""
 
-    # Country
-    country = list_of_details[1].find(string=True, recursive=False).strip()
-    print(f'COUNTRY: {country}')
-
-    # Episode Count
-    episode_count = list_of_details[2].text
-    episode_count = int(episode_count.split()[1])
-    print(f'EP COUNT: {episode_count}')
-
-    # Air Dates
-    air_dates = list_of_details[3].text
-    air_dates = air_dates.split(":")[1].strip()
-    print(f'AIR DATE: {air_dates}')
-
-    # Original Network
-    networks = list_of_details[5].find_all("a")
-    networks = [n.text for n in networks]
-    print(f"ORIGINAL NETWORKS: {networks}")
-
-    # Duration
-    duration = list_of_details[6].contents[-1]
-    duration = duration.strip()
-    print(f"DURATION: {duration}")
+    # In this for loop, obtain: name, country, ep count, air dates, networks, duration
+    for list_item in list_items_p_a_0_RIGHT_SIDE:
+        if list_item.find("b"): # just to make sure there is a <b> element before we get the text of it
+            if list_item.find("b").text == "Drama:":
+                name = list_item.find("span").text
+            if list_item.find("b").text == "Country:":
+                # print(list_item.find(string=True, recursive=False).strip())
+                country_ = list_item.contents[1].strip()
+                country = country_
+            if list_item.find("b").text == "Episodes:":
+                episode_count_ = list_item.text
+                episode_count_ = episode_count_.split()[1]
+                episode_count = int(episode_count_)
+            if list_item.find("b").text == "Aired:":
+                air_dates_ = list_item.text
+                air_dates = air_dates_.split(":")[1].strip()
+            if list_item.find("b").text == "Original Network:":
+                networks_ = list_item.find_all("a")
+                networks = [n.text for n in networks_ if n]
+            if list_item.find("b").text == "Duration:":
+                duration = list_item.contents[-1].strip()
 
     # Content Rating
-    content_rating = list_m_b_0.find("li", class_="list-item p-a-0 content-rating").text
-    content_rating = content_rating.split(":")[1].strip()
+    list_item_content_rating = list_m_b_0.find("li", class_="list-item p-a-0 content-rating")
+    if list_item_content_rating: content_rating = list_item_content_rating.text.split(":")[1].strip()
+
+    print(f'NAME: {name}')
+    print(f'COUNTRY: {country}')
+    print(f'EP COUNT: {episode_count}')
+    print(f'AIR DATE(s): {air_dates}')
+    print(f"ORIGINAL NETWORKS: {networks}")
+    print(f"DURATION: {duration}")
     print(f"CONTENT RATING: {content_rating}")
 
+    # Airing
+    airing = False
+    print(f"AIRING: {airing}")
+
+    # -------- Saving cast URL, genres, tags, and cover to external files --------- #
+
+    # Save cast URL link to text file
+    cast_url_path = "scraped_data/completed_SK_cast.txt"
+    cast_url_name = title + "_" + str(mdl_id) + "_" + cast_url + "\n"
+    with open(cast_url_path, 'a', encoding="utf-8") as f:
+        f.write(cast_url_name)
+    
+    # Save drama's genres and tags to csv
+    genre_string = ""
+    if len(genres) != 0:
+        for i in range(len(genres)):
+            if i == len(genres) - 1:
+                genre_string += genres[i]
+            else:
+                genre_string += genres[i] + ","
+    print(f"genre string: {genre_string}")
+
+    tags_string = ""
+    if len(tags) != 0:
+        for i in range(len(tags)):
+            if i == len(tags) - 1:
+                tags_string += tags[i]
+            else:
+                tags_string += tags[i] + ","
+    print(f"tag string: {tags_string}")
+
     # Save cover to folder
-    cleaned_title = title_with_year.replace(" ", "").replace("(", "-").replace(")", "")
-    cover_path = "scraped_data/completed_SK_covers/" + cleaned_title + "-" + str(mdl_id) + ".jpg"
+    cleaned_title = title_with_year.replace(" ", "").replace("(", "_").replace(")", "")
+    cover_path = "scraped_data/completed_SK_covers/" + cleaned_title + "_" + str(mdl_id) + ".jpg"
     with open(cover_path, 'wb') as f:
         response = requests.get(cover_link)
         f.write(response.content)
     print(f"COVER PATH: {cover_path}")
 
-    # Airing
-    airing = False
-    print(f"AIRING: {airing}")
 
     # All data
     scraped_dict = {}
@@ -168,7 +191,8 @@ def scrape_page_completedSK(link):
 def main():
     drama_links = open("scraped_data/completed_SK_links.txt", "r") 
     # test_link = drama_links.readline().strip()  
-    test_link = "https://mydramalist.com/754549-tokyo-hinkon-joshi"
+    # test_link = "https://mydramalist.com/728827-land"
+    test_link = "https://mydramalist.com/705857-umbrella"
     scrape_page_completedSK(test_link)
 
     drama_links.close()

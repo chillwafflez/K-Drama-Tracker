@@ -10,7 +10,7 @@ output_file_name = "scraped_data/completed_SK_links.txt"
 output_file = open(output_file_name, "w", encoding="utf-8") 
 
 # Loop through each page, saving links to each completed South Korean drama to text file
-for i in range(1,3):    # currently 178 pages
+for i in range(1,3):    # currently 179 pages
     # Get page
     print(f"-----PAGE {i}-----")
     page_link = top_kdramas_link + "&page=" + str(i)
@@ -29,4 +29,4 @@ for i in range(1,3):    # currently 178 pages
         output_file.write(URL + drama_link + "\n")
     sleep(random.randint(5,15))
 
-    output_file.close()
+output_file.close()
