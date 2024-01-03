@@ -114,6 +114,7 @@ def scrape_page_completedSK(link):
             if list_item.find("b").text == "Aired:":
                 air_dates_ = list_item.text
                 air_dates = air_dates_.split(":")[1].strip()
+                air_dates = " ".join(air_dates.split())
             if list_item.find("b").text == "Original Network:":
                 networks_ = list_item.find_all("a")
                 networks = [n.text for n in networks_ if n]
@@ -144,7 +145,16 @@ def scrape_page_completedSK(link):
     with open(cast_url_path, 'a', encoding="utf-8") as f:
         f.write(cast_url_name)
     
-    # Save drama's genres and tags to csv
+    # Save drama's networks, genres, and tags to csv
+    network_string = ""
+    if len(networks) != 0:
+        for i in range(len(networks)):
+            if i == len(networks) - 1:
+                network_string += networks[i]
+            else:
+                network_string += networks[i] + ","
+    print(f"network string: {network_string}")
+
     genre_string = ""
     if len(genres) != 0:
         for i in range(len(genres)):
@@ -154,14 +164,18 @@ def scrape_page_completedSK(link):
                 genre_string += genres[i] + ","
     print(f"genre string: {genre_string}")
 
-    tags_string = ""
+    tag_string = ""
     if len(tags) != 0:
         for i in range(len(tags)):
             if i == len(tags) - 1:
-                tags_string += tags[i]
+                tag_string += tags[i]
             else:
-                tags_string += tags[i] + ","
-    print(f"tag string: {tags_string}")
+                tag_string += tags[i] + ","
+    print(f"tag string: {tag_string}")
+
+    with open("./scraped_data/completed_SK_genres_tags.csv", mode='a', newline='') as f:
+        writer = csv.writer(f)
+        writer.writerow([title, title_with_year, mdl_id, network_string, genre_string, tag_string])
 
     # Save cover to folder
     cleaned_title = title_with_year.replace(" ", "").replace("(", "_").replace(")", "")
