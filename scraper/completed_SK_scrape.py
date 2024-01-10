@@ -61,6 +61,7 @@ def scrape_page_completedSK(link):
                             other_names_str += name["title"] + "_"
     print(f"NATIVE TITLE: {native_title}")
     print(f"OTHER NAMES: {other_names_list}")
+    other_names_str = other_names_str.rstrip('_')
     print(f"OTHER NAMES STRING: {other_names_str}")
 
     # Genre
@@ -173,12 +174,12 @@ def scrape_page_completedSK(link):
                 tag_string += tags[i] + ","
     print(f"tag string: {tag_string}")
 
-    with open("./scraped_data/completed_SK_genres_tags.csv", mode='a', newline='') as f:
+    with open("./scraped_data/completed_SK_extra_info.csv", mode='a', newline='') as f:
         writer = csv.writer(f)
-        writer.writerow([title, title_with_year, mdl_id, network_string, genre_string, tag_string])
+        writer.writerow([title, title_with_year, mdl_id, network_string, genre_string, tag_string, cast_url])
 
     # Save cover to folder
-    cleaned_title = title_with_year.replace(" ", "").replace("(", "_").replace(")", "")
+    cleaned_title = title_with_year.replace(" ", "").replace("(", "_").replace(")", "").replace("'", "")
     cover_path = "scraped_data/completed_SK_covers/" + cleaned_title + "_" + str(mdl_id) + ".jpg"
     with open(cover_path, 'wb') as f:
         response = requests.get(cover_link)
@@ -205,8 +206,10 @@ def scrape_page_completedSK(link):
 def main():
     drama_links = open("scraped_data/completed_SK_links.txt", "r") 
     # test_link = drama_links.readline().strip()  
-    # test_link = "https://mydramalist.com/728827-land"
-    test_link = "https://mydramalist.com/705857-umbrella"
+    test_link = "https://mydramalist.com/728827-land"
+    # test_link = "https://mydramalist.com/705857-umbrella"
+    # test_link = "https://mydramalist.com/702271-weak-hero-season-2"
+    # test_link = "https://mydramalist.com/710963-yeonhwa-palace"
     scrape_page_completedSK(test_link)
 
     drama_links.close()
