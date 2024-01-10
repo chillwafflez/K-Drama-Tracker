@@ -1,27 +1,18 @@
-test = "1 hr. 40 min."
-# test = "40 min."
-# if minute in test:
-#     print("hi")
+from api.db import get_connection
 
-# if hour in test:
-#     print("bye")
+synopsis = "i love aot. it's justin's favorite anime EVER! but yorimoi is a close second. penis's"
+synopsis = synopsis.replace("'", "''")
+sql = f"INSERT INTO drama(mdl_id, title, native_title, synopsis, duration, airing, cover_path) VALUES (6969, 'test drama', 'dqdw', '{synopsis}', 43, False, 'blah/blah/wsup.png');"
 
-# if (hour in test) and (minute in test):
-#     print("bruh")
+conn = get_connection()
+cursor = conn.cursor()
+cursor.execute(sql)
+conn.commit()
 
-# split = test.split('hr')
-# print(split)
+sql2 = "SELECT * FROM drama WHERE drama.title = 'test drama';"
+cursor.execute(sql2)
+results = cursor.fetchone()
+print(results)
 
-split = test.rstrip('.').split('.')
-hour = 0
-min = 0
-if len(split) == 2:
-    hour = int(split[0].split()[0])
-    min = int(split[1].split()[0])
-else:
-    min = int(split[0].split()[0])
-
-duration = (hour * 60) + min
-print(hour)
-print(min)
-print(f"duration: {duration}")
+cursor.close()
+conn.close()

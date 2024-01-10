@@ -2,7 +2,38 @@ import requests
 from bs4 import BeautifulSoup
 from time import sleep
 import csv
-import re
+import psycopg2
+import psycopg2.pool
+from dotenv import load_dotenv
+import os
+
+def get_connection():
+    try:
+        load_dotenv() 
+        print("Connecting to PostgreSQL database...")
+
+        conn = psycopg2.connect(host = os.environ.get("DB_HOST"),
+                                database = os.environ.get("DB_NAME"),
+                                user = os.environ.get("DB_USER"),
+                                password = os.environ.get("DB_PASSWORD"))
+        print(f"Successfully connected")
+        return conn
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+
+def get_pool():
+    try:
+        load_dotenv()
+        print("Creating connection pool (min = 2, max = 3)")
+        
+        pool = psycopg2.pool.SimpleConnectionPool( 
+            2, 3, user=os.environ.get("DB_USER"), password=os.environ.get("DB_PASSWORD"), 
+            host=os.environ.get("DB_HOST"), port='5432', database=os.environ.get("DB_NAME"))
+        print(f"Successfully connected!")
+        return pool
+    
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
 
 def scrape_page_completedSK(link):
     page = requests.get(link)
@@ -254,21 +285,36 @@ def get_related_content(root_element, prequel_str, compilation_str, sequel_str):
 
 # Move data to database / create record in drama table for drama
 def to_db(drama_data):
-    sql1 = "INSERT INTO drama(mdl_id, title, native_title, other_names, rating, MDL_rating, synopsis, episode_count, duration, content_rating, country, air_date, airing, cover_path) "
-    sql2 = f"VALUES ()"
+    conn = get_connection()
+    cursor = conn.cursor()
+    mdl_id, title, native_title, other_names_str, mdl_rating = drama_data['mdl_id'], drama_data['title'], drama_data['native_title'], drama_data['other_names'], drama_data['mdl_rating']
+    synopsis, ep_count, duration, content_rating = drama_data['synopsis'], drama_data['ep_count'], drama_data['duration'], drama_data['content_rating']
+    country, air_date, airing, cover_path = drama_data['country'], drama_data['air_date'], drama_data['airing'], drama_data['cover_path']
+
+    synopsis = synopsis.replace("'", "''")
+
+    temp1 = "INSERT INTO drama(mdl_id, title, native_title, other_names, mdl_rating, synopsis, episode_count, duration, content_rating, country, air_date, airing, cover_path) "
+    temp2 = f"VALUES ({mdl_id}, '{title}', '{native_title}', '{other_names_str}', '{mdl_rating}', '{synopsis}', {ep_count}, {duration}, '{content_rating}', '{country}', '{air_date}', '{airing}', '{cover_path}');"
+    sql = temp1 + temp2
+    cursor.execute(sql)
+    conn.commit()
+
+    cursor.close()
+    conn.close()
 
 def main():
-    drama_links = open("data/completed_SK_links.txt", "r") 
-    # test_link = drama_links.readline().strip()  
-    # test_link = "https://mydramalist.com/728827-land"
-    # test_link = "https://mydramalist.com/705857-umbrella"
-    # test_link = "https://mydramalist.com/702267-weak-hero"
-    # test_link = "https://mydramalist.com/710963-yeonhwa-palace"
-    # test_link = "https://mydramalist.com/57173-hospital-playlist-2" # multiple related content (compilation)
-    test_link = "https://mydramalist.com/739603-sparkling-watermelon"
+    # drama_links = open("data/completed_SK_links.txt", "r") 
+    # # test_link = drama_links.readline().strip()  
+    # # test_link = "https://mydramalist.com/728827-land"
+    # # test_link = "https://mydramalist.com/705857-umbrella"
+    # # test_link = "https://mydramalist.com/702267-weak-hero"
+    # # test_link = "https://mydramalist.com/710963-yeonhwa-palace"
+    # # test_link = "https://mydramalist.com/57173-hospital-playlist-2" # multiple related content (compilation)
+    try:
+        test_link = "https://mydramalist.com/739603-sparkling-watermelon"
+    except Exception:
+        print("Error encountered. Not entering into db")
     data = scrape_page_completedSK(test_link)
-    print(data)
-
-    drama_links.close()
+    to_db(data)
 
 main()
