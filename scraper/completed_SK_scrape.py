@@ -141,7 +141,7 @@ def scrape_page_completedSK(link):
     # -------- Saving cast URL, genres, tags, and cover to external files --------- #
 
     # Save cast URL link to text file
-    cast_url_path = "scraped_data/completed_SK_cast.txt"
+    cast_url_path = "data/completed_SK_cast.txt"
     cast_url_name = title + "_" + str(mdl_id) + "_" + cast_url + "\n"
     with open(cast_url_path, 'a', encoding="utf-8") as f:
         f.write(cast_url_name)
@@ -174,13 +174,13 @@ def scrape_page_completedSK(link):
                 tag_string += tags[i] + ","
     print(f"tag string: {tag_string}")
 
-    with open("./scraped_data/completed_SK_extra_info.csv", mode='a', newline='') as f:
+    with open("./data/completed_SK_extra_info.csv", mode='a', newline='') as f:
         writer = csv.writer(f)
         writer.writerow([title, title_with_year, mdl_id, network_string, genre_string, tag_string, cast_url])
 
     # Save cover to folder
     cleaned_title = title_with_year.replace(" ", "").replace("(", "_").replace(")", "").replace("'", "")
-    cover_path = "scraped_data/completed_SK_covers/" + cleaned_title + "_" + str(mdl_id) + ".jpg"
+    cover_path = "data/completed_SK_covers/" + cleaned_title + "_" + str(mdl_id) + ".jpg"
     with open(cover_path, 'wb') as f:
         response = requests.get(cover_link)
         f.write(response.content)
@@ -204,7 +204,7 @@ def scrape_page_completedSK(link):
 
 
 def main():
-    drama_links = open("scraped_data/completed_SK_links.txt", "r") 
+    drama_links = open("data/completed_SK_links.txt", "r") 
     # test_link = drama_links.readline().strip()  
     test_link = "https://mydramalist.com/728827-land"
     # test_link = "https://mydramalist.com/705857-umbrella"

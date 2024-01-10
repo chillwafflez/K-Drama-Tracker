@@ -26,7 +26,7 @@ tags = "Palace Setting,Prince Male Lead,Historical Fiction,Royalty,Joseon Dynast
 #     df.to_csv(f, index=False, header=False, lineterminator='\n')
 
 # # Using csv module
-with open("./scraped_data/completed_SK_genres_tags.csv", mode='a', newline='') as f:
+with open("./data/completed_SK_genres_tags.csv", mode='a', newline='') as f:
     writer = csv.writer(f)
     writer.writerow([title, title_with_year, mld_id, networks, genres, tags])
 
