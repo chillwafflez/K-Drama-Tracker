@@ -2,11 +2,12 @@ import requests
 from bs4 import BeautifulSoup
 from time import sleep
 import csv
-
+import re
 
 def scrape_page_completedSK(link):
     page = requests.get(link)
     soup = BeautifulSoup(page.content, "html.parser")
+    URL = "https://mydramalist.com"
 
     # ---------- Get Information from Left Side of Page ----------- #
     left_side = soup.find("div", class_="col-lg-8 col-md-8 col-rightx")
@@ -40,12 +41,22 @@ def scrape_page_completedSK(link):
 
     # -- Get Native title, other names, or other list-item p-a-0s -- #
     list_items_p_a_0_LEFT_SIDE = extra_info.find_all("li", class_="list-item p-a-0")
+    
+    # Get Related content if there is any
+    prequel_str = ""
+    compilation_str = ""
+    sequel_str = ""
+    prequel_str, compilation_str, sequel_str, related_content_exists = get_related_content(extra_info, prequel_str, compilation_str, sequel_str)
+    if related_content_exists:
+        print("RELATED CONTENT:")
+        print(f"PREQUEL STRING: {prequel_str}")   
+        print(f"COMPILATION STRING: {compilation_str}")   
+        print(f"SEQUEL STRING: {sequel_str}")  
 
+    # loop through all list items of class list-item p-a-0 to get: native title, other names
     native_title = ""
     other_names_list = []
     other_names_str = ""
-
-    # loop through all list items of class list-item p-a-0 to get: native title, other names
     for list_item in list_items_p_a_0_LEFT_SIDE:
         if list_item.find("b"):
             # check their b tag to get correct data
@@ -96,7 +107,7 @@ def scrape_page_completedSK(link):
     episode_count = 0
     air_dates = ""
     networks = []
-    duration = ""
+    duration = 0
     content_rating = ""
 
     # In this for loop, obtain: name, country, ep count, air dates, networks, duration
@@ -120,7 +131,16 @@ def scrape_page_completedSK(link):
                 networks_ = list_item.find_all("a")
                 networks = [n.text for n in networks_ if n]
             if list_item.find("b").text == "Duration:":
-                duration = list_item.contents[-1].strip()
+                hour = 0
+                min = 0
+                duration_str = list_item.contents[-1].strip()
+                duration_str = duration_str.rstrip('.').split('.')
+                if len(duration_str) == 2:
+                    hour = int(duration_str[0].split()[0])
+                    min = int(duration_str[1].split()[0])
+                else:
+                    min = int(duration_str[0].split()[0])
+                duration = (hour * 60) + min
 
     # Content Rating
     list_item_content_rating = list_m_b_0.find("li", class_="list-item p-a-0 content-rating")
@@ -154,7 +174,7 @@ def scrape_page_completedSK(link):
                 network_string += networks[i]
             else:
                 network_string += networks[i] + ","
-    print(f"network string: {network_string}")
+    print(f"NETWORK STRING: {network_string}")
 
     genre_string = ""
     if len(genres) != 0:
@@ -163,7 +183,7 @@ def scrape_page_completedSK(link):
                 genre_string += genres[i]
             else:
                 genre_string += genres[i] + ","
-    print(f"genre string: {genre_string}")
+    print(f"GENRE STRING: {genre_string}")
 
     tag_string = ""
     if len(tags) != 0:
@@ -172,11 +192,17 @@ def scrape_page_completedSK(link):
                 tag_string += tags[i]
             else:
                 tag_string += tags[i] + ","
-    print(f"tag string: {tag_string}")
+    print(f"TAG STRING: {tag_string}")
 
     with open("./data/completed_SK_extra_info.csv", mode='a', newline='') as f:
         writer = csv.writer(f)
         writer.writerow([title, title_with_year, mdl_id, network_string, genre_string, tag_string, cast_url])
+    
+    # Save drama's related content if there is any
+    if related_content_exists:
+        with open("./data/completed_SK_related.csv", mode='a', newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow([title, title_with_year, mdl_id, prequel_str, compilation_str, sequel_str])
 
     # Save cover to folder
     cleaned_title = title_with_year.replace(" ", "").replace("(", "_").replace(")", "").replace("'", "")
@@ -186,8 +212,6 @@ def scrape_page_completedSK(link):
         f.write(response.content)
     print(f"COVER PATH: {cover_path}")
 
-
-    # All data
     scraped_dict = {}
     scraped_dict['mdl_id'] = mdl_id
     scraped_dict['title'] = title
@@ -196,21 +220,54 @@ def scrape_page_completedSK(link):
     scraped_dict['mdl_rating'] = mdl_rating
     scraped_dict['synopsis'] = show_synopsis
     scraped_dict['ep_count'] = episode_count
+    scraped_dict['duration'] = duration
+    scraped_dict['content_rating'] = content_rating
+    scraped_dict['country'] = country
     scraped_dict['air_date'] = air_dates
     scraped_dict['airing'] = airing
-    scraped_dict['Title'] = title
-    scraped_dict['Title'] = title
-    scraped_dict['link'] = link
+    scraped_dict['cover_path'] = cover_path
+    return scraped_dict
 
+def get_related_content(root_element, prequel_str, compilation_str, sequel_str):
+    URL = "https://mydramalist.com"
+    related_content_exists = False
+    related_content_li = root_element.find("li", class_="list-item p-a-0 m-b-sm related-content")
+    print("Related content penis: ")
+    if related_content_li:
+        related_content_exists = True
+        related_content_divs = related_content_li.find_all("div", class_="title")
+        for div in related_content_divs:
+            related_content_link = URL + div.find("a").get('href')
+            content_type = div.contents[-1].strip()
+            content_type = content_type.replace('(', "").replace(')', "").split()[1]            
+            if content_type == 'prequel':
+                prequel_str += related_content_link + ',,'
+            elif content_type == 'compilation':
+                compilation_str += related_content_link + ',,'
+            elif content_type == 'sequel':
+                sequel_str += related_content_link + ',,'
+    if related_content_exists:
+        prequel_str = prequel_str.rstrip(',,')
+        compilation_str = compilation_str.rstrip(',,')
+        sequel_str = sequel_str.rstrip(',,')
+    return prequel_str, compilation_str, sequel_str, related_content_exists
+
+# Move data to database / create record in drama table for drama
+def to_db(drama_data):
+    sql1 = "INSERT INTO drama(mdl_id, title, native_title, other_names, rating, MDL_rating, synopsis, episode_count, duration, content_rating, country, air_date, airing, cover_path) "
+    sql2 = f"VALUES ()"
 
 def main():
     drama_links = open("data/completed_SK_links.txt", "r") 
     # test_link = drama_links.readline().strip()  
-    test_link = "https://mydramalist.com/728827-land"
+    # test_link = "https://mydramalist.com/728827-land"
     # test_link = "https://mydramalist.com/705857-umbrella"
-    # test_link = "https://mydramalist.com/702271-weak-hero-season-2"
+    # test_link = "https://mydramalist.com/702267-weak-hero"
     # test_link = "https://mydramalist.com/710963-yeonhwa-palace"
-    scrape_page_completedSK(test_link)
+    # test_link = "https://mydramalist.com/57173-hospital-playlist-2" # multiple related content (compilation)
+    test_link = "https://mydramalist.com/739603-sparkling-watermelon"
+    data = scrape_page_completedSK(test_link)
+    print(data)
 
     drama_links.close()
 
