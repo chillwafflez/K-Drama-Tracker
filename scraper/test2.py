@@ -1,39 +1,23 @@
-import pandas as pd
+# import re
 import csv
 
-# title = "Moving"
-# title_with_year = "Moving (2023)"
-# mld_id = 25560
-# genres = "Action,Thriller,Mystery,Supernatural"
-# tags = "Graphic Violence,Supernatural Power,Student Female Lead,Student Male Lead,Agent Female Lead,Agent Male Lead,Family Relationship,Past And Present,Multiple Mains,High School"
+# bruh = "TwinklingWatermelon's_2023_739603"
 
-title = "Yeonhwa Palace"
-title_with_year = "Yeonhwa Palace (1967)"
-mld_id = 710963
-networks = "Netflix,tvN"
-genres = "Historical,Melodrama"
-tags = "Palace Setting,Prince Male Lead,Historical Fiction,Royalty,Joseon Dynasty"
+# yuh = re.sub(r'[^\w.-]', '', bruh)
+# print(yuh)
+# print(bruh)
 
-# data = {'title': title,
-#         'title_year': title_with_year,
-#         'mdl_id': mld_id,
-#         'genres': genres,
-#         'tags': tags}
-# df = pd.DataFrame(data, index=[0])
+def main():
+    with open ('data\completed_SK_extra_info.csv', 'r') as csvfile:
+       reader = csv.reader (csvfile, delimiter=',')
+       next(reader)     # skip first row which are just column headers
+       for row in reader: # loop over the rows
+        drama_title = row[0]
+        year = row[1]
+        mdl_id = row[2]
+        network_string = row[3]
+        genre_string = row[4]
+        tag_string = row[5]
+        print(tag_string)
 
-# print(df)
-# with open("./scraped_data/completed_SK_genres_tags.csv", 'a') as f:
-#     df.to_csv(f, index=False, header=False, lineterminator='\n')
-
-# # Using csv module
-with open("./data/completed_SK_genres_tags.csv", mode='a', newline='') as f:
-    writer = csv.writer(f)
-    writer.writerow([title, title_with_year, mld_id, networks, genres, tags])
-
-
-    
-# df.to_csv("./scraped_data/completed_SK_genres_tags.csv", mode='a', index=False, header=False)
-
-
-# df = pd.read_csv("./scraped_data/completed_SK_genres_tags.csv", usecols=['title'])
-# print(df)
+main()

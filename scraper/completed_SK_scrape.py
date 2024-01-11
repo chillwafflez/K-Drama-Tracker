@@ -1,11 +1,13 @@
 import requests
 from bs4 import BeautifulSoup
 from time import sleep
+import random
 import csv
 import psycopg2
 import psycopg2.pool
 from dotenv import load_dotenv
 import os
+import re
 
 def get_connection():
     try:
@@ -48,8 +50,9 @@ def scrape_page_completedSK(link):
     print(f"TITLE: {title}")
 
     # Get title with year
-    title_with_year = left_side.find("h1", class_="film-title").text if left_side.find("h1", class_="film-title") else "N/A"
-    print(f"TITLE (with year): {title_with_year}")
+    year_str = left_side.find("h1", class_="film-title").contents[-1]
+    year = int(year_str.replace('(', "").replace(')', "").strip())
+    print(f"YEAR: {year}")
 
     # Get MDL ID
     mdl_id = int(link.split("/")[3].split("-")[0])
@@ -227,17 +230,19 @@ def scrape_page_completedSK(link):
 
     with open("./data/completed_SK_extra_info.csv", mode='a', newline='') as f:
         writer = csv.writer(f)
-        writer.writerow([title, title_with_year, mdl_id, network_string, genre_string, tag_string, cast_url])
+        writer.writerow([title, year, mdl_id, network_string, genre_string, tag_string, cast_url])
     
     # Save drama's related content if there is any
     if related_content_exists:
         with open("./data/completed_SK_related.csv", mode='a', newline='') as f:
             writer = csv.writer(f)
-            writer.writerow([title, title_with_year, mdl_id, prequel_str, compilation_str, sequel_str])
+            writer.writerow([title, year, mdl_id, prequel_str, compilation_str, sequel_str])
 
     # Save cover to folder
-    cleaned_title = title_with_year.replace(" ", "").replace("(", "_").replace(")", "").replace("'", "")
-    cover_path = "data/completed_SK_covers/" + cleaned_title + "_" + str(mdl_id) + ".jpg"
+    # cleaned_title = title.replace(" ", "").replace("'", "").replace("\"", "")
+    cleaned_title = re.sub(r'[^\w.-]', '', title)
+    cleaned_title = cleaned_title.replace('_', '')
+    cover_path = "data/completed_SK_covers/" + cleaned_title + "_" + str(year) + "_" + str(mdl_id) + ".jpg"
     with open(cover_path, 'wb') as f:
         response = requests.get(cover_link)
         f.write(response.content)
@@ -256,6 +261,7 @@ def scrape_page_completedSK(link):
     scraped_dict['country'] = country
     scraped_dict['air_date'] = air_dates
     scraped_dict['airing'] = airing
+    scraped_dict['air_year'] = year
     scraped_dict['cover_path'] = cover_path
     return scraped_dict
 
@@ -289,12 +295,15 @@ def to_db(drama_data):
     cursor = conn.cursor()
     mdl_id, title, native_title, other_names_str, mdl_rating = drama_data['mdl_id'], drama_data['title'], drama_data['native_title'], drama_data['other_names'], drama_data['mdl_rating']
     synopsis, ep_count, duration, content_rating = drama_data['synopsis'], drama_data['ep_count'], drama_data['duration'], drama_data['content_rating']
-    country, air_date, airing, cover_path = drama_data['country'], drama_data['air_date'], drama_data['airing'], drama_data['cover_path']
+    country, air_date, air_year, airing, cover_path = drama_data['country'], drama_data['air_date'], drama_data['air_year'], drama_data['airing'], drama_data['cover_path']
 
+    title = title.replace("'", "''")
+    native_title = native_title.replace("'", "''")
+    other_names_str = other_names_str.replace("'", "''")
     synopsis = synopsis.replace("'", "''")
 
-    temp1 = "INSERT INTO drama(mdl_id, title, native_title, other_names, mdl_rating, synopsis, episode_count, duration, content_rating, country, air_date, airing, cover_path) "
-    temp2 = f"VALUES ({mdl_id}, '{title}', '{native_title}', '{other_names_str}', '{mdl_rating}', '{synopsis}', {ep_count}, {duration}, '{content_rating}', '{country}', '{air_date}', '{airing}', '{cover_path}');"
+    temp1 = "INSERT INTO drama(mdl_id, title, native_title, other_names, mdl_rating, synopsis, episode_count, duration, content_rating, country, air_date, air_year, airing, cover_path) "
+    temp2 = f"VALUES ({mdl_id}, '{title}', '{native_title}', '{other_names_str}', '{mdl_rating}', '{synopsis}', {ep_count}, {duration}, '{content_rating}', '{country}', '{air_date}', {air_year}, '{airing}', '{cover_path}');"
     sql = temp1 + temp2
     cursor.execute(sql)
     conn.commit()
@@ -311,10 +320,19 @@ def main():
     # # test_link = "https://mydramalist.com/710963-yeonhwa-palace"
     # # test_link = "https://mydramalist.com/57173-hospital-playlist-2" # multiple related content (compilation)
     try:
-        test_link = "https://mydramalist.com/739603-sparkling-watermelon"
+        test_link = "https://mydramalist.com/25560-moving"
     except Exception:
         print("Error encountered. Not entering into db")
     data = scrape_page_completedSK(test_link)
     to_db(data)
 
 main()
+
+def testing():
+    with open("data\completed_SK_links.txt", 'r') as f:
+        lines = f.readlines()
+        for i in range(len(lines)):
+            link = lines[i].rstrip()
+            print(link)
+            sleep(random.randint(3,10))
+
