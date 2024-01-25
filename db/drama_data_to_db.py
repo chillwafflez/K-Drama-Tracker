@@ -175,9 +175,12 @@ def main():
         tag_string = row[5].replace("'", "''")
 
         try:
-            move_drama_genres_to_db(drama_title, mdl_id, year, genre_string, conn)
-            move_drama_tags_to_db(drama_title, mdl_id, year, tag_string, conn)
-            move_drama_networks_to_db(drama_title, mdl_id, year, network_string, conn)
+            if genre_string != "":
+                move_drama_genres_to_db(drama_title, mdl_id, year, genre_string, conn)
+            if tag_string != "":
+                move_drama_tags_to_db(drama_title, mdl_id, year, tag_string, conn)
+            if network_string != "":
+                move_drama_networks_to_db(drama_title, mdl_id, year, network_string, conn)
         except:
            print("bruh")
     

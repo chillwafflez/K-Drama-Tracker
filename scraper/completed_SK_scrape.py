@@ -80,12 +80,14 @@ def scrape_page_completedSK(link):
     prequel_str = ""
     compilation_str = ""
     sequel_str = ""
-    prequel_str, compilation_str, sequel_str, related_content_exists = get_related_content(extra_info, prequel_str, compilation_str, sequel_str)
+    spinoff_str = ""
+    prequel_str, compilation_str, sequel_str, spinoff_str, related_content_exists = get_related_content(extra_info, prequel_str, compilation_str, sequel_str, spinoff_str)
     if related_content_exists:
         print("RELATED CONTENT:")
         print(f"PREQUEL STRING: {prequel_str}")   
         print(f"COMPILATION STRING: {compilation_str}")   
-        print(f"SEQUEL STRING: {sequel_str}")  
+        print(f"SEQUEL STRING: {sequel_str}") 
+        print(f"SPINOFF STRING: {spinoff_str}") 
 
     # loop through all list items of class list-item p-a-0 to get: native title, other names
     native_title = ""
@@ -236,7 +238,7 @@ def scrape_page_completedSK(link):
     if related_content_exists:
         with open("./data/completed_SK_related.csv", mode='a', newline='') as f:
             writer = csv.writer(f)
-            writer.writerow([title, year, mdl_id, prequel_str, compilation_str, sequel_str])
+            writer.writerow([title, year, mdl_id, prequel_str, compilation_str, sequel_str, spinoff_str])
 
     # Save cover to folder
     # cleaned_title = title.replace(" ", "").replace("'", "").replace("\"", "")
@@ -265,29 +267,32 @@ def scrape_page_completedSK(link):
     scraped_dict['cover_path'] = cover_path
     return scraped_dict
 
-def get_related_content(root_element, prequel_str, compilation_str, sequel_str):
+def get_related_content(root_element, prequel_str, compilation_str, sequel_str, spinoff_str):
     URL = "https://mydramalist.com"
     related_content_exists = False
     related_content_li = root_element.find("li", class_="list-item p-a-0 m-b-sm related-content")
-    print("Related content penis: ")
     if related_content_li:
         related_content_exists = True
         related_content_divs = related_content_li.find_all("div", class_="title")
         for div in related_content_divs:
             related_content_link = URL + div.find("a").get('href')
+            related_content_title = div.find("a").get('title').strip()
             content_type = div.contents[-1].strip()
             content_type = content_type.replace('(', "").replace(')', "").split()[1]            
             if content_type == 'prequel':
-                prequel_str += related_content_link + ',,'
+                prequel_str += related_content_title + '||' + related_content_link + ',,'
             elif content_type == 'compilation':
-                compilation_str += related_content_link + ',,'
+                compilation_str += related_content_title + '||' + related_content_link + ',,'
             elif content_type == 'sequel':
-                sequel_str += related_content_link + ',,'
+                sequel_str += related_content_title + '||' + related_content_link + ',,'
+            elif content_type == 'spinoff':
+                spinoff_str += related_content_title + '||' + related_content_link + ',,'
     if related_content_exists:
         prequel_str = prequel_str.rstrip(',,')
         compilation_str = compilation_str.rstrip(',,')
         sequel_str = sequel_str.rstrip(',,')
-    return prequel_str, compilation_str, sequel_str, related_content_exists
+        spinoff_str = spinoff_str.rstrip(',,')
+    return prequel_str, compilation_str, sequel_str, spinoff_str, related_content_exists
 
 # Move data to database / create record in drama table for drama
 def to_db(drama_data):
@@ -320,7 +325,7 @@ def main():
     # # test_link = "https://mydramalist.com/710963-yeonhwa-palace"
     # # test_link = "https://mydramalist.com/57173-hospital-playlist-2" # multiple related content (compilation)
     try:
-        test_link = "https://mydramalist.com/25560-moving"
+        test_link = "https://mydramalist.com/702267-weak-hero"
     except Exception:
         print("Error encountered. Not entering into db")
     data = scrape_page_completedSK(test_link)

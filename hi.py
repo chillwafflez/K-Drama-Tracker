@@ -1,20 +1,18 @@
-from api.db import get_connection
+# bruh = "Hospital Playlist Special|||https://mydramalist.com/689959-hospital-playlist-special,,Hospital Playlist Goes Camping|||https://mydramalist.com/690567-wise-camping-life"
 
-synopsis = "i love aot. it's justin's favorite anime EVER! but yorimoi is a close second. penis's"
-synopsis = synopsis.replace("'", "''")
-title = "justin's cafe"
-title = title.replace("'", "''")
-sql = f"INSERT INTO drama(mdl_id, title, native_title, synopsis, duration, air_year, airing, cover_path) VALUES (6969, '{title}', 'dqdw', '{synopsis}', 43, 2023, False, 'blah/blah/wsup.png');"
+# each_one = bruh.split(",,")
+# print(each_one)
 
-conn = get_connection()
-cursor = conn.cursor()
-cursor.execute(sql)
-conn.commit()
+# first_one = each_one[0].split("|||")
+# title = first_one[0]
+# link = first_one[1]
 
-sql2 = f"SELECT * FROM drama WHERE drama.title = {title};"
-cursor.execute(sql2)
-results = cursor.fetchone()
-print(results)
+# print(f"title: {title}")
+# print(f"link: {link}")
+peepe = ""
 
-cursor.close()
-conn.close()
+if peepe:
+    print("HII")
+else:
+    print("BYEES")
+    print(f"re; {len(peepe)}")

@@ -17,6 +17,27 @@ def get_connection():
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
 
+def select_query(stmt):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(stmt)
+    results = cursor.fetchone()
+
+    cursor.close()
+    conn.close()
+    return results
+
+def select_all_query(stmt):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(stmt)
+    results = cursor.fetchall()
+
+    cursor.close()
+    conn.close()
+    return results
+
+
 def get_pool():
     try:
         load_dotenv()
