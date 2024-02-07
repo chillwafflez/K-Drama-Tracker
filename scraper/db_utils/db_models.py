@@ -1,9 +1,6 @@
-from sqlalchemy import create_engine, ForeignKey, Column, String, Integer, VARCHAR, TEXT, DATE, NUMERIC, BOOLEAN
-from sqlalchemy import  select, and_, MetaData, Table
-from sqlalchemy.engine import URL
-from sqlalchemy.orm import sessionmaker, declarative_base
-from sqlalchemy_utils import database_exists
-import requests
+from sqlalchemy import ForeignKey, Column, String, Integer, VARCHAR, TEXT, DATE, NUMERIC, BOOLEAN
+from sqlalchemy import MetaData, Table
+from sqlalchemy.orm import declarative_base
 
 Base = declarative_base()
 
@@ -35,6 +32,9 @@ class Actor(Base):
         self.age = age
         self.biography = bio
         self.picture_path = path
+    
+    def __repr__(self):
+        return f"HIII {self.first_name}"
 
 class Drama(Base):
     __tablename__ = 'drama'
@@ -87,27 +87,16 @@ class Character(Base):
         self.character_name = character_name
         self.actor_role = actor_role
 
+# def main():
+#     engine = get_engine()
+#     Session = sessionmaker(bind=engine)
+#     session = Session()
 
-def get_engine():
-    url = 'postgresql+psycopg2://chillywafflez:ilovekdramas1532@k-drama-tracker-db.cdoxevnwyxjg.us-west-1.rds.amazonaws.com:5432/initial_k_drama_tracker_db'
-    if not database_exists(url):
-        print("bruh")
-    else:
-        print("yippee")
-
-    engine = create_engine(url)
-    return engine
-
-def main():
-    engine = get_engine()
-    Session = sessionmaker(bind=engine)
-    session = Session()
-
-    # test_actor = Actor(6969, "Justin", "Nguyen", "Justeen", "bruh__hi", "Vietnamese", "Male", "2003-04-28", 20, "blah blah blah", "path_blah_png")
-    character = Character(1, 3, "Shrek", "Main Role")
-    session.add(character)
-    session.commit()
-    session.close()
-    engine.dispose()
+#     # test_actor = Actor(6969, "Justin", "Nguyen", "Justeen", "bruh__hi", "Vietnamese", "Male", "2003-04-28", 20, "blah blah blah", "path_blah_png")
+#     character = Character(1, 3, "Shrek", "Main Role")
+#     session.add(character)
+#     session.commit()
+#     session.close()
+#     engine.dispose()
 
 # main()

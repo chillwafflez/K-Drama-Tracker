@@ -2,6 +2,8 @@ import psycopg2
 import psycopg2.pool
 from dotenv import load_dotenv
 import os
+from sqlalchemy_utils import database_exists
+from sqlalchemy import create_engine
 
 def get_connection():
     try:
@@ -30,3 +32,13 @@ def get_pool():
     
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
+
+def get_engine():
+    url = 'postgresql+psycopg2://chillywafflez:ilovekdramas1532@k-drama-tracker-db.cdoxevnwyxjg.us-west-1.rds.amazonaws.com:5432/initial_k_drama_tracker_db'
+    if not database_exists(url):
+        print("bruh")
+    else:
+        print("yippee")
+
+    engine = create_engine(url)
+    return engine

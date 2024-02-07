@@ -8,34 +8,8 @@ import psycopg2.pool
 from dotenv import load_dotenv
 import os
 import re
+from db_utils.staff_data_to_db import get_connection
 
-def get_connection():
-    try:
-        load_dotenv() 
-        print("Connecting to PostgreSQL database...")
-
-        conn = psycopg2.connect(host = os.environ.get("DB_HOST"),
-                                database = os.environ.get("DB_NAME"),
-                                user = os.environ.get("DB_USER"),
-                                password = os.environ.get("DB_PASSWORD"))
-        print(f"Successfully connected")
-        return conn
-    except (Exception, psycopg2.DatabaseError) as error:
-        print(error)
-
-def get_pool():
-    try:
-        load_dotenv()
-        print("Creating connection pool (min = 2, max = 3)")
-        
-        pool = psycopg2.pool.SimpleConnectionPool( 
-            2, 3, user=os.environ.get("DB_USER"), password=os.environ.get("DB_PASSWORD"), 
-            host=os.environ.get("DB_HOST"), port='5432', database=os.environ.get("DB_NAME"))
-        print(f"Successfully connected!")
-        return pool
-    
-    except (Exception, psycopg2.DatabaseError) as error:
-        print(error)
 
 def scrape_page_completedSK(link):
     page = requests.get(link)
@@ -318,12 +292,12 @@ def to_db(drama_data):
 
 def main():
     # drama_links = open("data/completed_SK_links.txt", "r") 
-    # # test_link = drama_links.readline().strip()  
-    # # test_link = "https://mydramalist.com/728827-land"
-    # # test_link = "https://mydramalist.com/705857-umbrella"
-    # # test_link = "https://mydramalist.com/702267-weak-hero"
-    # # test_link = "https://mydramalist.com/710963-yeonhwa-palace"
-    # # test_link = "https://mydramalist.com/57173-hospital-playlist-2" # multiple related content (compilation)
+    # test_link = drama_links.readline().strip()  
+    # test_link = "https://mydramalist.com/728827-land"
+    # test_link = "https://mydramalist.com/705857-umbrella"
+    # test_link = "https://mydramalist.com/702267-weak-hero"
+    # test_link = "https://mydramalist.com/710963-yeonhwa-palace"
+    # test_link = "https://mydramalist.com/57173-hospital-playlist-2" # multiple related content (compilation)
 
     path = "data/completed_SK_links.txt"
     with open(path, 'r') as f:
@@ -335,13 +309,4 @@ def main():
             data = scrape_page_completedSK(link)
             to_db(data)
 
-main()
-
-def testing():
-    with open("data\completed_SK_links.txt", 'r') as f:
-        lines = f.readlines()
-        for i in range(len(lines)):
-            link = lines[i].rstrip()
-            print(link)
-            sleep(random.randint(3,10))
-
+# main()

@@ -187,15 +187,3 @@ def main():
     conn.close()
 
 main()
-
-def testing():
-    conn = get_connection()
-    cursor = conn.cursor()
-    sql = "SELECT EXISTS (SELECT * FROM drama_genre WHERE drama_id = 2 AND genre_id = 2);"
-    cursor.execute(sql)
-    drama_record_exists = cursor.fetchone()[0]
-    print(drama_record_exists)
-    
-    cursor.close()
-    conn.close()
-
