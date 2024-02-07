@@ -16,8 +16,8 @@ class Drama(Resource):
         except:
             return "Error", 404
 
-        sql = f"SELECT * FROM drama WHERE drama.id = {drama_id};"
-        results = select_query(sql)
+        drama_sql = f"SELECT * FROM drama WHERE drama.id = {drama_id};"
+        results = select_query(drama_sql)
         
         drama_info = {}
         cover_path = f"https://drama-tracker-images-v1.s3.us-west-1.amazonaws.com/{results[15]}"
@@ -26,6 +26,11 @@ class Drama(Resource):
         drama_info['synopsis'], drama_info['ep_count'], drama_info['duration'] = results[7], int(results[8]), int(results[9])
         drama_info['content_rating'], drama_info['country'], drama_info['air_date'] = results[10], results[11], results[12]
         drama_info['air_year'], drama_info['airing'], drama_info['cover_path'] = int(results[13]), bool(results[14]), cover_path
+
+        genre_sql = "SELECT genre.id, genre_name FROM genre JOIN drama_genre ON drama_genre.genre_id = genre.id JOIN drama ON drama_genre.drama_id = drama.id WHERE drama.id = 1;"
+
+        results = select_all_query(genre_sql)
+        drama_info['genres'] = results
 
         # pool.putconn(conn)
         return jsonify(drama_info)

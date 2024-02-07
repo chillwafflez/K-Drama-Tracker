@@ -3,7 +3,7 @@ from sqlalchemy import  select, and_, MetaData, Table
 from sqlalchemy.engine import URL
 from sqlalchemy.orm import sessionmaker, declarative_base
 from sqlalchemy_utils import database_exists
-
+import requests
 
 Base = declarative_base()
 
@@ -37,7 +37,7 @@ class Actor(Base):
         self.picture_path = path
 
 class Drama(Base):
-    __tablename__ = 'actor'
+    __tablename__ = 'drama'
     
     id = Column(Integer, primary_key=True, autoincrement=True)
     mdl_id = Column("mdl_id", Integer)
@@ -110,4 +110,4 @@ def main():
     session.close()
     engine.dispose()
 
-main()
+# main()

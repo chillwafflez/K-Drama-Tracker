@@ -324,12 +324,16 @@ def main():
     # # test_link = "https://mydramalist.com/702267-weak-hero"
     # # test_link = "https://mydramalist.com/710963-yeonhwa-palace"
     # # test_link = "https://mydramalist.com/57173-hospital-playlist-2" # multiple related content (compilation)
-    try:
-        test_link = "https://mydramalist.com/702267-weak-hero"
-    except Exception:
-        print("Error encountered. Not entering into db")
-    data = scrape_page_completedSK(test_link)
-    to_db(data)
+
+    path = "data/completed_SK_links.txt"
+    with open(path, 'r') as f:
+        for i, line in enumerate(f):
+            if i == 10:
+                break
+            link = line.strip()
+            print(f"{i} | {link}")
+            data = scrape_page_completedSK(link)
+            to_db(data)
 
 main()
 

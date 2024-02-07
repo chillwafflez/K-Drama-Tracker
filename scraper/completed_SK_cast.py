@@ -6,30 +6,6 @@ from sqlalchemy.orm import sessionmaker
 from time import sleep
 import random
 from db_models import *
-
-
-def move_to_db(actor_details, character_details, actor_picture_URL): 
-    # Save cover to folder
-    cleaned_first_name = actor_details['First Name'].strip().replace(" ", "")
-    cleaned_last_name = actor_details['Family Name'].strip().replace(" ", "")
-    birth_year = actor_details['Born'].split(',')[1].strip()
-    picture_path = "data/actor_covers/" + cleaned_first_name + "__" + cleaned_last_name + "__" + birth_year + "__" + str(actor_details['MDL ID']) + ".jpg"
-    with open(picture_path, 'wb') as f:
-        response = requests.get(actor_picture_URL)
-        f.write(response.content)
-    print(f"ACTOR PICTURE PATH: {picture_path}")
-
-
-    engine = get_engine()
-    Session = sessionmaker(bind=engine)
-    session = Session()
-
-    # test_actor = Actor(6969, "Justin", "Nguyen", "Justeen", "bruh__hi", "Vietnamese", "Male", "2003-04-28", 20, "blah blah blah", "path_blah_png")
-    actor = Actor(actor_details['MDL ID'], actor_details['First Name'], actor_details['Family Name'], actor_details['Native name'], actor_details['Also Known as'], actor_details['Nationality'], actor_details['Gender'], actor_details['Born'], actor_details['Age'], actor_details['Biography'], picture_path)
-    session.add(actor)
-    session.commit()
-    session.close()
-
     
 
 # Obtain all of the actor's data, including URL to their face picture
@@ -91,17 +67,40 @@ def scrape_page(link):
                 character_details['Role'] = role
                 actor_details, actor_picture_URL = scrape_actor(actor_page_url)
 
-                move_to_db(actor_details, character_details, actor_picture_URL)
+                move_actor_to_db(actor_details, character_details, actor_picture_URL)
                 print()
                 sleep(random.randint(3,5))
 
 
+def move_actor_to_db(actor_details, character_details, actor_picture_URL): 
+    # Save cover to folder
+    cleaned_first_name = actor_details['First Name'].strip().replace(" ", "")
+    cleaned_last_name = actor_details['Family Name'].strip().replace(" ", "")
+    birth_year = actor_details['Born'].split(',')[1].strip()
+    picture_path = "data/actor_covers/" + cleaned_first_name + "__" + cleaned_last_name + "__" + birth_year + "__" + str(actor_details['MDL ID']) + ".jpg"
+    with open(picture_path, 'wb') as f:
+        response = requests.get(actor_picture_URL)
+        f.write(response.content)
+    print(f"ACTOR PICTURE PATH: {picture_path}")
+
+
+    engine = get_engine()
+    Session = sessionmaker(bind=engine)
+    session = Session()
+
+    # test_actor = Actor(6969, "Justin", "Nguyen", "Justeen", "bruh__hi", "Vietnamese", "Male", "2003-04-28", 20, "blah blah blah", "path_blah_png")
+    actor = Actor(actor_details['MDL ID'], actor_details['First Name'], actor_details['Family Name'], actor_details['Native name'], actor_details['Also Known as'], actor_details['Nationality'], actor_details['Gender'], actor_details['Born'], actor_details['Age'], actor_details['Biography'], picture_path)
+    session.add(actor)
+    session.commit()
+    session.close()
+
+
 def main():
-    # actor_link_1 = "https://mydramalist.com/people/1974-jo-jung-suk"
-    actor_link_2 = "https://mydramalist.com/people/23666-shim-dal-gi"
-    wsup, wsup_URL = scrape_actor(actor_link_2)
+    actor_link_1 = "https://mydramalist.com/people/1974-jo-jung-suk"
+    # actor_link_2 = "https://mydramalist.com/people/23666-shim-dal-gi"
+    wsup, wsup_URL = scrape_actor(actor_link_1)
     nothing = ""
-    move_to_db(wsup, nothing, wsup_URL)
+    move_actor_to_db(wsup, nothing, wsup_URL)
     # page_link = "https://mydramalist.com/25560-moving/cast"
     # scrape_page(page_link)
     # test()

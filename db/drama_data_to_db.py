@@ -1,5 +1,5 @@
 import csv
-from db import get_connection
+from db_connection import get_connection
 
 def move_drama_genres_to_db(title, mdl_id, year, genre_str, conn):
     cursor = conn.cursor()
