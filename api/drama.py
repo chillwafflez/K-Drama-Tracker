@@ -1,11 +1,9 @@
-from db import get_connection, get_pool, select_query, select_all_query
-from flask import Flask, jsonify, Blueprint
-from flask_restful import reqparse, abort, Api, Resource
+from db import select_query, select_all_query
+from flask import Flask, jsonify, Blueprint, request
+from flask_restful import Api, Resource
 
 drama_api = Blueprint('drama_api', __name__)
 api = Api(drama_api)
-
-# pool = get_pool()
 
 class Drama(Resource):
     def get(self, drama_id):
@@ -31,23 +29,72 @@ class Drama(Resource):
         int(drama_info['air_year']) if  drama_info['air_year'] else  drama_info['air_year']
         bool(drama_info['airing']) if  drama_info['airing'] else  drama_info['airing']
 
-        # pool.putconn(conn)
         return jsonify(drama_info)
     
-# class Dramas(Resource):
-#     def get():
-#         sql = "SELECT * FROM drama;"
-#         results = select_all_query(sql)
+class Dramas(Resource):
+    def get(self):
+        sql = "SELECT * FROM drama;"
+        results = select_all_query(sql)
 
-#         return jsonify(results)
+        return jsonify(results)
 
-# Getting dramas by genres, tags, or networks
-@drama_api.route("/dramas", methods=['GET'])
-def get():
-    sql = "SELECT * FROM drama;"
+# Search dramas by name
+@drama_api.route("/dramas/search", methods=['GET'])
+def search_dramas():
+    name = request.args.get('name')
+    if name == None:
+        return "Error", 404
+    
+    sql = f"SELECT id, title, native_title, rating, synopsis, episode_count, country, air_year FROM drama WHERE title ILIKE '%{name}%';"
     results = select_all_query(sql)
 
+    print(len(results))
+    return jsonify(results)
+
+
+# ---- Genres, Tags, Networks ---- #
+
+# Getting all genres for a drama
+@drama_api.route("/dramas/<drama_id>/genres", methods=['GET'])
+def get_drama_genres(drama_id):
+    sql = f"SELECT genre.id, genre_name FROM genre JOIN drama_genre ON drama_genre.genre_id = genre.id JOIN drama ON drama_genre.drama_id = drama.id WHERE drama.id = {drama_id};"
+    results = select_all_query(sql)
+    return jsonify(results)
+
+# Getting all tags for a drama
+@drama_api.route("/dramas/<drama_id>/tags", methods=['GET'])
+def get_drama_tags(drama_id):
+    sql = f"SELECT tag.id, tag_name FROM tag JOIN drama_tag ON drama_tag.tag_id = tag.id JOIN drama ON drama_tag.drama_id = drama.id WHERE drama.id = {drama_id};"
+    results = select_all_query(sql)
+    return jsonify(results)
+
+# Getting all networks for a drama
+@drama_api.route("/dramas/<drama_id>/networks", methods=['GET'])
+def get_drama_networks(drama_id):
+    sql = f"SELECT network.id, network_name FROM network JOIN drama_network ON drama_network.network_id = network.id JOIN drama ON drama_network.drama_id = drama.id WHERE drama.id = {drama_id};"
+    results = select_all_query(sql)
+    return jsonify(results)
+
+# Getting all dramas of a specific genre
+@drama_api.route("/genres/<genre_id>", methods=['GET'])
+def get_genre_dramas(genre_id):
+    sql = f"SELECT drama.id, title, native_title, other_names, rating, cover_path FROM drama JOIN drama_genre ON drama_genre.drama_id = drama.id JOIN genre ON drama_genre.genre_id = genre.id WHERE genre.id = {genre_id};"
+    results = select_all_query(sql)
+    return jsonify(results)
+
+# Getting all dramas of a specific tag
+@drama_api.route("/tags/<tag_id>", methods=['GET'])
+def get_tag_dramas(tag_id):
+    sql = f"SELECT drama.id, title, native_title, other_names, rating, cover_path FROM drama JOIN drama_tag ON drama_tag.drama_id = drama.id JOIN tag ON drama_tag.tag_id = tag.id WHERE tag.id = {tag_id};"
+    results = select_all_query(sql)
+    return jsonify(results)
+
+# Getting all dramas of a specific network
+@drama_api.route("/networks/<network_id>", methods=['GET'])
+def get_network_dramas(network_id):
+    sql = f"SELECT drama.id, title, native_title, other_names, rating, cover_path FROM drama JOIN drama_network ON drama_network.drama_id = drama.id JOIN tag ON drama_network.tag_id = network.id WHERE network.id = {network_id};"
+    results = select_all_query(sql)
     return jsonify(results)
 
 api.add_resource(Drama, '/dramas/<drama_id>')
-# api.add_resource(Dramas, '/dramas')
+api.add_resource(Dramas, '/dramas')

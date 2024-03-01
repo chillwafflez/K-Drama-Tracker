@@ -17,6 +17,15 @@ def get_connection():
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
 
+def execute_query(stmt):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(stmt)
+    conn.commit()
+
+    cursor.close()
+    conn.close()
+
 def select_query(stmt):
     conn = get_connection()
     cursor = conn.cursor()

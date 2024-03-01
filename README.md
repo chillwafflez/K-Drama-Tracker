@@ -1,2 +1,2 @@
-# K-Drama-Tracker
-Personal project to track K-Dramas I have watched or are currently watching.
+# K-Drama-Tracker-Backend
+Personal project to recreate backend of a show-tracker using Flask

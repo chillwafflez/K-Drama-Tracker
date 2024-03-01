@@ -61,9 +61,10 @@ def scrape_page(link):
 
                 character_details['Character name'] = character_name
                 character_details['Role'] = role
-                actor_details, actor_picture_URL = scrape_actor(actor_page_url)
+                # actor_details, actor_picture_URL = scrape_actor(actor_page_url)
 
-                move_actor_to_db(actor_details, character_details, actor_picture_URL)
+                # move_actor_to_db(actor_details, character_details, actor_picture_URL)
+                print(character_details)
                 print()
                 sleep(random.randint(3,5))
 
@@ -71,12 +72,10 @@ def scrape_page(link):
 def main():
     actor_link_1 = "https://mydramalist.com/people/7712-kim-dae-myung"
     # actor_link_2 = "https://mydramalist.com/people/23666-shim-dal-gi"
-    wsup, wsup_URL = scrape_actor(actor_link_1)
-    nothing = ""
-    move_actor_to_db(wsup, nothing, wsup_URL)
-    # page_link = "https://mydramalist.com/25560-moving/cast"
-    # scrape_page(page_link)
-    # test()
+    cast_link1 = "https://mydramalist.com/57173-hospital-playlist-2/cast"
+    scrape_page(cast_link1)
+    # wsup, wsup_URL = scrape_actor(actor_link_1)
+
 
 
 main()

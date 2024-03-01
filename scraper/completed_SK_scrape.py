@@ -1,12 +1,10 @@
 import requests
 from bs4 import BeautifulSoup
 from time import sleep
-import random
 import csv
 import psycopg2
 import psycopg2.pool
 from dotenv import load_dotenv
-import os
 import re
 from db_utils.staff_data_to_db import get_connection
 
