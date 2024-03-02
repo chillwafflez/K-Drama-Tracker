@@ -3,3 +3,5 @@ flaskenv
 completed_SK_covers/
 actor_covers/
 __pycache__/
+routes/__pycache__
+scraper/db_utils/__pycache__

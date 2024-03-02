@@ -1,8 +1,8 @@
 from flask import Flask, Response
-from drama import drama_api
-from user import user_api
-from actor import actor_api
-from review import review_api
+from routes.drama import drama_api
+from routes.user import user_api
+from routes.actor import actor_api
+from routes.review import review_api
 from flask_restful import Api
 
 app = Flask(__name__)
