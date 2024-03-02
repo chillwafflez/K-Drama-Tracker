@@ -1,4 +1,4 @@
-from db import select_query, select_all_query, execute_query
+from routes.db import select_query, select_all_query, execute_query
 from flask import Flask, jsonify, Blueprint, request
 from flask_restful import reqparse, abort, Api, Resource
 
